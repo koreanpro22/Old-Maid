@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
 from myapp.models import PlayingCard, User
-from myapp.serializers import PlayingCardSerializer
+from myapp.serializers import PlayingCardSerializer, UserSerializer
 
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -18,7 +18,10 @@ class PlayingCardList(generics.ListAPIView):
     queryset = PlayingCard.objects.all()
     serializer_class = PlayingCardSerializer
 
+class PlayingCardCreate(generics.CreateAPIView):
+    queryset = PlayingCard.objects.all()
+    serializer_class = PlayingCardSerializer
+
 class UserList(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
