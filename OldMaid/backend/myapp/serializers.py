@@ -4,7 +4,7 @@ from myapp.models import PlayingCard, User
 class PlayingCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayingCard
-        fields = ['name']
+        fields = ['suit','value']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
