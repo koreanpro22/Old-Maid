@@ -59,33 +59,97 @@ const GamePage = () => {
     const playerHands = makeHands(cards,joker);
 
     return (
-        <View style={styles.container}>
-            <Text>Test Game Page</Text>
-            <Button onPress={() => setReset(!reset)} style={styles.reset} title='Click here to reset'/>
+        <View>
+            <View style={styles.reset}>
+                <Button onPress={() => setReset(!reset)} title='Click here to reset'/>
+            </View>
+            <View style={styles.board}>
+                <View style={styles.playingSide}>
+                    <View style={styles.cards}>
+                        
+                        {playerHands[0].map(card => {
+                            return (
+                                <Text>
+                                    {card.value}
+                                </Text>
+                            )
+                        })}
+                    </View>
+                </View>
+                <View style={styles.midBoard}>
+
+                </View>
+                <View style={styles.playingSide}>
+                    <View style={styles.cards}>
+                        {playerHands[1].map(card => {
+                            return (
+                                <View style={styles.singleCard}>
+                                    <Text>
+                                        {card.value}
+                                    </Text>
+                                </View>
+                            )
+                        })}
+                    </View>
+                </View>
+            </View>
         </View>
     )
-
 }
 
 const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
       borderWidth: 5,
       borderColor: 'green',
     },
     reset: {
         // flex: 1,
-        justifyContent: 'center',
-        alignContent: 'center',
+        position: 'absolute',
+        top: 350,
+        right: 50,
+        width: 150,
+        zIndex: 1,
+        // justifyContent: 'center',
+        // alignContent: 'center',
     },
-
+    
     board: {
-        
-
+        flexDirection: 'column',
+        borderWidth: 5,
+        borderColor: 'green',
+        height: 800,
     },
+    
+    playingSide: {
+        // flexDirection: 'row',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 300,
+        borderColor: 'blue',
+        borderWidth: 5,
+    },
+    midBoard: {
+        flex: 1,
+        flexDirection: 'row',
+        height: 300,
+        borderColor: 'red',
+        borderWidth: 5,
+    },
+    cards: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 2,
+    },
+    singleCard: {
+        borderColor: 'black',
+        height: 55,
+        width: 42,
+        borderWidth: 1,
+        padding: 2,
+    }
   });
 
 export default GamePage
