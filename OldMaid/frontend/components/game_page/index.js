@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button } from "react-native"
 
 const GamePage = () => {
+    console.log('hitting game page')
 
     const [reset, setReset] = useState(true)
     const [compHand, setCompHand] = useState([])
     const [playerHand, setPlayerHand] = useState([])
+
+    useEffect(() => {
+        makeHands(cards,joker);
+    }, [reset])
+
+    useEffect(() => {
+        console.log('hitting useeffect')
+    }, [playerHand])
 
     class Card {
         constructor(value, suit) {
@@ -13,6 +22,7 @@ const GamePage = () => {
             this.suit = suit;
         }
     }
+
     function makeCards() {
         let arr = []
         let suit = ['diamond', 'club', 'heart', 'spade']
@@ -32,17 +42,22 @@ const GamePage = () => {
 
         return joker
     }
-    async function makeHands(cards, joker) {
-        function shuffleArray() {
-            // Fisher-Yates (Knuth) shuffle algorithm
-            for (let i = cards.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [cards[i], cards[j]] = [cards[j], cards[i]];
-            }
+    function shuffleArray(arr) {
+        console.log('hitting shuffleArray')
+        console.log('arr before shuffle', arr)
+        // Fisher-Yates (Knuth) shuffle algorithm
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
-          
+        
+        return arr;
+    }
+    async function makeHands(cards, joker) {
+        console.log('hitting make hands')
+        
         // Shuffle the array
-        shuffleArray();
+        cards = shuffleArray(cards);
         
         // Select the first half of the shuffled array
         const player1Hand = cards.slice(0, Math.floor(cards.length / 2));
@@ -72,27 +87,35 @@ const GamePage = () => {
                         )
                     })}
                 </View>
-                <Button title="SHuffle Hand"/>
             </View>
         )
     }
-
+    
     const cards = makeCards();
     const joker = makeJoker();
     
-    if (!compHand && !playerHand) {
+    //idk why this works
+    if (!compHand.length && !playerHand.length) {
         makeHands(cards,joker);
     }
-
+    
     return (
         <View>
             <View style={styles.board}>
-                {handsComponent(compHand)}
+                {compHand.length && handsComponent(compHand)}
 
                 <View style={styles.midBoard}>
                 </View>
                 
                 {handsComponent(playerHand)}
+                <Button onPress={() => {
+                    console.log('hitting shuffle button')
+                    console.log(playerHand)
+                    let newHand = shuffleArray(playerHand)
+                    console.log('======')
+                    console.log(newHand)
+                    setPlayerHand(newHand)
+                }} title="Shuffling Hand"/>
             </View>
             <View style={styles.reset}>
 
