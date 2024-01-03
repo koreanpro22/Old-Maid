@@ -4,6 +4,9 @@ import { StyleSheet, View, Text, Button } from "react-native"
 const GamePage = () => {
 
     const [reset, setReset] = useState(true)
+    const [compHand, setCompHand] = useState([])
+    const [playerHand, setPlayerHand] = useState([])
+
     class Card {
         constructor(value, suit) {
             this.value = value;
@@ -29,7 +32,7 @@ const GamePage = () => {
 
         return joker
     }
-    function makeHands(cards, joker) {
+    async function makeHands(cards, joker) {
         function shuffleArray() {
             // Fisher-Yates (Knuth) shuffle algorithm
             for (let i = cards.length - 1; i > 0; i--) {
@@ -50,48 +53,50 @@ const GamePage = () => {
         let randInt = Math.floor(Math.random()*2);
 
         res[randInt].push(joker)
+        await setCompHand(res[0])
+        await setPlayerHand(res[1])
         return res;
         
+    }
+    function handsComponent(hand) {
+        return (
+            <View style={styles.playingSide}>
+                <View style={styles.cards}>                        
+                    {hand.map(card => {
+                        return (
+                            <View style={styles.singleCard}>
+                                <Text>
+                                    {card.value} {card.suit.slice(0,5)}
+                                </Text>
+                            </View>
+                        )
+                    })}
+                </View>
+                <Button title="SHuffle Hand"/>
+            </View>
+        )
     }
 
     const cards = makeCards();
     const joker = makeJoker();
-    const playerHands = makeHands(cards,joker);
+    
+    if (!compHand && !playerHand) {
+        makeHands(cards,joker);
+    }
 
     return (
         <View>
-            <View style={styles.reset}>
-                <Button onPress={() => setReset(!reset)} title='Click here to reset'/>
-            </View>
             <View style={styles.board}>
-                <View style={styles.playingSide}>
-                    <View style={styles.cards}>
-                        
-                        {playerHands[0].map(card => {
-                            return (
-                                <Text>
-                                    {card.value}
-                                </Text>
-                            )
-                        })}
-                    </View>
-                </View>
-                <View style={styles.midBoard}>
+                {handsComponent(compHand)}
 
+                <View style={styles.midBoard}>
                 </View>
-                <View style={styles.playingSide}>
-                    <View style={styles.cards}>
-                        {playerHands[1].map(card => {
-                            return (
-                                <View style={styles.singleCard}>
-                                    <Text>
-                                        {card.value}
-                                    </Text>
-                                </View>
-                            )
-                        })}
-                    </View>
-                </View>
+                
+                {handsComponent(playerHand)}
+            </View>
+            <View style={styles.reset}>
+
+                <Button onPress={() => setReset(!reset)} title='Click here to reset'/>
             </View>
         </View>
     )
@@ -123,19 +128,19 @@ const styles = StyleSheet.create({
     },
     
     playingSide: {
+        borderColor: 'blue',
         // flexDirection: 'row',
         flex: 1,
-        alignItems: 'center',
+        // alignItems: 'center',
         justifyContent: 'center',
         height: 300,
-        borderColor: 'blue',
         borderWidth: 5,
     },
     midBoard: {
+        borderColor: 'red',
         flex: 1,
         flexDirection: 'row',
         height: 300,
-        borderColor: 'red',
         borderWidth: 5,
     },
     cards: {
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
         width: 42,
         borderWidth: 1,
         padding: 2,
-    }
+    },
   });
 
 export default GamePage
