@@ -43,8 +43,6 @@ const GamePage = () => {
         return joker
     }
     function shuffleArray(arr) {
-        console.log('hitting shuffleArray')
-        console.log('arr before shuffle', arr)
         // Fisher-Yates (Knuth) shuffle algorithm
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -54,8 +52,6 @@ const GamePage = () => {
         return arr;
     }
     async function makeHands(cards, joker) {
-        console.log('hitting make hands')
-
         // Shuffle the array
         cards = shuffleArray(cards);
 
@@ -111,11 +107,7 @@ const GamePage = () => {
             <View style={styles.reset}>
 
                 <Button onPress={() => {
-                    console.log('hitting shuffle button')
-                    console.log(playerHand)
                     let newHand = shuffleArray(playerHand.slice())
-                    console.log('======')
-                    console.log(newHand)
                     setPlayerHand(newHand)
                 }} title="Shuffling Hand" />
                 <Button onPress={() => setReset(!reset)} title='Click here to reset' />
