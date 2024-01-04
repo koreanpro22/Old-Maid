@@ -1,20 +1,30 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button } from "react-native"
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const GamePage = () => {
     console.log('hitting game page')
 
+    const panGesture = Gesture.Pan()
+        .onStart((e) => {
+            console.log('dragging')
+        })
+        // .onUpdate((e) => {
+        // })
+        // .onEnd((e) => {
+        // });
+    
     const [reset, setReset] = useState(true)
     const [compHand, setCompHand] = useState([])
     const [playerHand, setPlayerHand] = useState([])
+    const [turn, setTurn] = useState()
 
     useEffect(() => {
         makeHands(cards, joker);
     }, [reset])
 
-    useEffect(() => {
-        console.log('Updated playerHand:', playerHand);
-    }, [playerHand]);
+    // useEffect(() => {
+    // }, [playerHand]);
 
     class Card {
         constructor(value, suit) {
@@ -39,12 +49,9 @@ const GamePage = () => {
     }
     function makeJoker() {
         let joker = new Card('joker', 'joker')
-
         return joker
     }
     function shuffleArray(arr) {
-        console.log('hitting shuffleArray')
-        console.log('arr before shuffle', arr)
         // Fisher-Yates (Knuth) shuffle algorithm
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -54,8 +61,6 @@ const GamePage = () => {
         return arr;
     }
     async function makeHands(cards, joker) {
-        console.log('hitting make hands')
-
         // Shuffle the array
         cards = shuffleArray(cards);
 
@@ -66,7 +71,7 @@ const GamePage = () => {
 
         let res = [player1Hand, player2Hand];
         let randInt = Math.floor(Math.random() * 2);
-
+        randInt ? await setTurn("Comp") : await setTurn("Player") 
         res[randInt].push(joker)
         await setCompHand(res[0])
         await setPlayerHand(res[1])
@@ -78,17 +83,36 @@ const GamePage = () => {
             <View style={styles.playingSide}>
                 <View style={styles.cards}>
                     {hand.length > 0 && hand.map(card => (
-                        <View style={styles.singleCard} key={`${card.value}-${card.suit}`}>
-                            <Text>
-                                {card.value} {card.suit.slice(0, 5)}
-                            </Text>
-                        </View>
+                        <GestureDetector gesture={panGesture}>
+                            <View style={styles.singleCard} key={`${card.value}-${card.suit}`}>
+                                <Text>
+                                    {card.value} {card.suit.slice(0, 5)}
+                                </Text>
+                            </View>
+                        </GestureDetector>
                     ))}
                 </View>
             </View>
         );
     }
 
+    function cleanUpDupes(hand) {
+        const obj = {}
+
+        for (let card of hand) {
+            if (obj[card.value]) {
+                delete obj[card.value]
+            } else {
+                obj[card.value] = card
+            }
+        }
+        
+        return Object.values(obj)
+    }
+
+    // function handleDragSelection(x, y) {
+    //     if ()
+    // }
 
     const cards = makeCards();
     const joker = makeJoker();
@@ -98,29 +122,34 @@ const GamePage = () => {
         makeHands(cards, joker);
     }
 
+    const noDupePlayerHand = cleanUpDupes(playerHand.slice())
+    const noDupeCompHand = cleanUpDupes(compHand.slice())
+
+    // console.log(noDupePlayerHand)
+    // console.log(noDupeCompHand)
+    // console.log(turn)
+
     return (
-        <View>
-            <View style={styles.board}>
-                {compHand.length && handsComponent(compHand)}
+        <GestureHandlerRootView>
+            <View>
+                <View style={styles.board}>
+                    {compHand.length && handsComponent(compHand)}
 
-                <View style={styles.midBoard}>
+                    <View style={styles.midBoard}>
+                    </View>
+
+                    {handsComponent(playerHand)}
                 </View>
-
-                {handsComponent(playerHand)}
+                <View style={styles.reset}>
+                    <Button onPress={() => {
+                        let newHand = shuffleArray(playerHand.slice())
+                        setPlayerHand(newHand)
+                    }} title="Shuffling Hand" />
+                    <Button onPress={() => setReset(!reset)} title='Click here to reset' />
+                </View>
             </View>
-            <View style={styles.reset}>
+        </GestureHandlerRootView>
 
-                <Button onPress={() => {
-                    console.log('hitting shuffle button')
-                    console.log(playerHand)
-                    let newHand = shuffleArray(playerHand.slice())
-                    console.log('======')
-                    console.log(newHand)
-                    setPlayerHand(newHand)
-                }} title="Shuffling Hand" />
-                <Button onPress={() => setReset(!reset)} title='Click here to reset' />
-            </View>
-        </View>
     )
 }
 
