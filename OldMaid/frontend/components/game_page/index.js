@@ -15,14 +15,19 @@ const GamePage = () => {
         // .onEnd((e) => {
         // });
     
-    const [reset, setReset] = useState(true)
     const [compHand, setCompHand] = useState([])
     const [playerHand, setPlayerHand] = useState([])
-    const [turn, setTurn] = useState()
+    const [turn, setTurn] = useState('')
 
     useEffect(() => {
         makeHands(makeCards(), makeJoker());
-    }, [reset])
+        const noDupePlayerHand = cleanUpDupes(playerHand.slice())
+        const noDupeCompHand = cleanUpDupes(compHand.slice())
+
+        setPlayerHand(noDupePlayerHand)
+        setCompHand(noDupeCompHand)
+
+    }, [])
 
     function makeHands(cards, joker) {
         // Shuffle the array
@@ -42,53 +47,55 @@ const GamePage = () => {
         return res;
     }
 
-    function handsComponent(hand) {
+    function handsComponent(hand, side) {
         return (
             <View style={styles.playingSide}>
                 <View style={styles.cards}>
-                    {hand.length > 0 && hand.map(card => (
-                        <GestureDetector gesture={panGesture}>
+                    {hand.length > 0 && hand.map((card, idx) => (
+                        (side === 'Player') ? <GestureDetector gesture={panGesture}>
                             <View>
-                                <View style={styles.singleCard} key={`${card.value}-${card.suit}`}>
+                                <View style={styles.singleCard} key={`${card.value}-${card.suit}-${idx}`}>
                                     <Text>
                                         {card.value} {card.suit}
                                     </Text>
                                 </View>
                             </View>
-                        </GestureDetector>
+                        </GestureDetector> :
+                        <View>
+                            <View style={styles.singleCard} key={`${card.value}-${card.suit}-${idx}`}>
+                                <Text>
+                                    {card.value} {card.suit} {idx}
+                                </Text>
+                            </View>
+                        </View>
                     ))}
                 </View>
             </View>
         );
     }
 
-    // const cards = makeCards();
-    // const joker = makeJoker();
-
     //idk why this works
     if (compHand.length === 0 && playerHand.length === 0) {
         makeHands(makeCards(), makeJoker());
     }
 
-    const noDupePlayerHand = cleanUpDupes(playerHand.slice())
-    const noDupeCompHand = cleanUpDupes(compHand.slice())
+
 
     return (
         <GestureHandlerRootView>
             <View>
                 <View style={styles.board}>
-                    {compHand.length && handsComponent(compHand)}
+                    {compHand.length && handsComponent(compHand, "Player")}
 
                     <View style={styles.midBoard}>
                     </View>
-                    {handsComponent(playerHand)}
+                    {playerHand.length && handsComponent(playerHand)}
                 </View>
                 <View style={styles.reset}>
                     <Button onPress={() => {
                         let newHand = shuffleArray(playerHand.slice())
                         setPlayerHand(newHand)
                     }} title="Shuffling Hand" />
-                    <Button onPress={() => setReset(!reset)} title='Click here to reset' />
                 </View>
             </View>
         </GestureHandlerRootView>
