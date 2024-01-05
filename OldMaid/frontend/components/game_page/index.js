@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button } from "react-native"
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { cleanUpDupes, makeCards, makeJoker, shuffleArray } from './helpers';
 
 const GamePage = () => {
     console.log('hitting game page')
@@ -20,74 +21,39 @@ const GamePage = () => {
     const [turn, setTurn] = useState()
 
     useEffect(() => {
-        makeHands(cards, joker);
+        makeHands(makeCards(), makeJoker());
     }, [reset])
 
-    // useEffect(() => {
-    // }, [playerHand]);
-
-    class Card {
-        constructor(value, suit) {
-            this.value = value;
-            this.suit = suit;
-        }
-    }
-
-    function makeCards() {
-        let arr = []
-        let suit = ['diamond', 'club', 'heart', 'spade']
-        let suitCounter = 0
-        for (let i = 0; i < 52; i++) {
-            if (i && !(i % 13)) suitCounter++
-
-            const card = new Card(((i % 13) + 1).toString(), suit[suitCounter])
-            arr.push(card)
-        }
-
-        return arr
-
-    }
-    function makeJoker() {
-        let joker = new Card('joker', 'joker')
-        return joker
-    }
-    function shuffleArray(arr) {
-        // Fisher-Yates (Knuth) shuffle algorithm
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-
-        return arr;
-    }
-    async function makeHands(cards, joker) {
+    function makeHands(cards, joker) {
         // Shuffle the array
         cards = shuffleArray(cards);
-
+    
         // Select the first half of the shuffled array
         const player1Hand = cards.slice(0, Math.floor(cards.length / 2));
         // Select the second half of the shuffled array
         const player2Hand = cards.slice(Math.floor(cards.length / 2));
-
+    
         let res = [player1Hand, player2Hand];
         let randInt = Math.floor(Math.random() * 2);
-        randInt ? await setTurn("Comp") : await setTurn("Player") 
+        randInt ? setTurn("Comp") : setTurn("Player") 
         res[randInt].push(joker)
-        await setCompHand(res[0])
-        await setPlayerHand(res[1])
+        setCompHand(res[0])
+        setPlayerHand(res[1])
         return res;
-
     }
+
     function handsComponent(hand) {
         return (
             <View style={styles.playingSide}>
                 <View style={styles.cards}>
                     {hand.length > 0 && hand.map(card => (
                         <GestureDetector gesture={panGesture}>
-                            <View style={styles.singleCard} key={`${card.value}-${card.suit}`}>
-                                <Text>
-                                    {card.value} {card.suit.slice(0, 5)}
-                                </Text>
+                            <View>
+                                <View style={styles.singleCard} key={`${card.value}-${card.suit}`}>
+                                    <Text>
+                                        {card.value} {card.suit}
+                                    </Text>
+                                </View>
                             </View>
                         </GestureDetector>
                     ))}
@@ -96,38 +62,16 @@ const GamePage = () => {
         );
     }
 
-    function cleanUpDupes(hand) {
-        const obj = {}
-
-        for (let card of hand) {
-            if (obj[card.value]) {
-                delete obj[card.value]
-            } else {
-                obj[card.value] = card
-            }
-        }
-        
-        return Object.values(obj)
-    }
-
-    // function handleDragSelection(x, y) {
-    //     if ()
-    // }
-
-    const cards = makeCards();
-    const joker = makeJoker();
+    // const cards = makeCards();
+    // const joker = makeJoker();
 
     //idk why this works
     if (compHand.length === 0 && playerHand.length === 0) {
-        makeHands(cards, joker);
+        makeHands(makeCards(), makeJoker());
     }
 
     const noDupePlayerHand = cleanUpDupes(playerHand.slice())
     const noDupeCompHand = cleanUpDupes(compHand.slice())
-
-    // console.log(noDupePlayerHand)
-    // console.log(noDupeCompHand)
-    // console.log(turn)
 
     return (
         <GestureHandlerRootView>
@@ -137,7 +81,6 @@ const GamePage = () => {
 
                     <View style={styles.midBoard}>
                     </View>
-
                     {handsComponent(playerHand)}
                 </View>
                 <View style={styles.reset}>
